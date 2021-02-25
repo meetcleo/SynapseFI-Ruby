@@ -4,6 +4,8 @@ require 'json'
 module SynapsePayRest
   # Wrapper for HTTP requests using RestClient.
   class HTTPClient
+    DEFAULT_TIMEOUT_IN_SECONDS = 300
+
     # @!attribute [rw] base_url
     #   @return [String] the base url of the API (production or sandbox)
     # @!attribute [rw] config
@@ -30,6 +32,8 @@ module SynapsePayRest
 
       RestClient.proxy = options[:proxy_url] if options[:proxy_url]
       @proxy_url = options[:proxy_url]
+
+      @timeout = options[:timeout] || DEFAULT_TIMEOUT_IN_SECONDS
 
       @config = {
         client_id:     client_id,
@@ -92,7 +96,7 @@ module SynapsePayRest
         headers = headers.merge({'X-SP-IDEMPOTENCY-KEY' => options[:idempotency_key]})
       end
 
-      response = with_error_handling { RestClient::Request.execute(:method => :post, :url => full_url(path), :payload => payload.to_json, :headers => headers, :timeout => 300) }
+      response = with_error_handling { RestClient::Request.execute(:method => :post, :url => full_url(path), :payload => payload.to_json, :headers => headers, :timeout => timeout) }
       p 'RESPONSE:', JSON.parse(response) if @logging
       JSON.parse(response)
     end
@@ -106,7 +110,7 @@ module SynapsePayRest
     # 
     # @return [Hash] API response
     def patch(path, payload)
-      response = with_error_handling { RestClient::Request.execute(:method => :patch, :url => full_url(path), :payload => payload.to_json, :headers => headers, :timeout => 300) }
+      response = with_error_handling { RestClient::Request.execute(:method => :patch, :url => full_url(path), :payload => payload.to_json, :headers => headers, :timeout => timeout) }
       p 'RESPONSE:', JSON.parse(response) if @logging
       JSON.parse(response)
     end
@@ -138,6 +142,8 @@ module SynapsePayRest
     end
 
     private
+
+    attr_reader :timeout
 
     def full_url(path)
       "#{base_url}#{path}"
