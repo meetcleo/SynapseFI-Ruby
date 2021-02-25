@@ -46,7 +46,7 @@ module SynapsePayRest
     end
 
     # Returns headers for HTTP requests.
-    # 
+    #
     # @return [Hash]
     def headers
       user    = "#{config[:oauth_key]}|#{config[:fingerprint]}"
@@ -63,13 +63,13 @@ module SynapsePayRest
     alias_method :get_headers, :headers
 
     # Updates headers.
-    # 
+    #
     # @param oauth_key [String,void]
     # @param fingerprint [String,void]
     # @param client_id [String,void]
     # @param client_secret [String,void]
     # @param ip_address [String,void]
-    # 
+    #
     # @return [void]
     def update_headers(oauth_key: nil, fingerprint: nil, client_id: nil,
                        client_secret: nil, ip_address: nil, **options)
@@ -82,13 +82,13 @@ module SynapsePayRest
     end
 
     # Sends a POST request to the given path with the given payload.
-    # 
+    #
     # @param path [String]
     # @param payload [Hash]
     # @param idempotency_key [String] (optional) avoid accidentally performing the same operation twice
     #
     # @raise [SynapsePayRest::Error] subclass depends on HTTP response
-    # 
+    #
     # @return [Hash] API response
     def post(path, payload, **options)
       headers = get_headers
@@ -102,12 +102,12 @@ module SynapsePayRest
     end
 
     # Sends a PATCH request to the given path with the given payload.
-    # 
+    #
     # @param path [String]
     # @param payload [Hash]
-    # 
+    #
     # @raise [SynapsePayRest::Error] subclass depends on HTTP response
-    # 
+    #
     # @return [Hash] API response
     def patch(path, payload)
       response = with_error_handling { RestClient::Request.execute(:method => :patch, :url => full_url(path), :payload => payload.to_json, :headers => headers, :timeout => timeout) }
@@ -116,11 +116,11 @@ module SynapsePayRest
     end
 
     # Sends a GET request to the given path with the given payload.
-    # 
+    #
     # @param path [String]
-    # 
+    #
     # @raise [SynapsePayRest::Error] subclass depends on HTTP response
-    # 
+    #
     # @return [Hash] API response
     def get(path)
       response = with_error_handling { RestClient.get(full_url(path), headers) }
@@ -129,11 +129,11 @@ module SynapsePayRest
     end
 
     # Sends a DELETE request to the given path with the given payload.
-    # 
+    #
     # @param path [String]
-    # 
+    #
     # @raise [SynapsePayRest::Error] subclass depends on HTTP response
-    # 
+    #
     # @return [Hash] API response
     def delete(path)
       response = with_error_handling { RestClient.delete(full_url(path), headers) }
@@ -160,7 +160,7 @@ module SynapsePayRest
       }
       raise Error.from_response(body)
     rescue RestClient::Exception => e
-      if e.response.headers[:content_type] == 'application/json' 
+      if e.response.headers[:content_type] == 'application/json'
         body = JSON.parse(e.response.body)
       else
         body = {
