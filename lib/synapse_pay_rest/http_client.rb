@@ -34,6 +34,8 @@ module SynapsePayRest
       @proxy_url = options[:proxy_url]
 
       @timeout = options[:timeout] || DEFAULT_TIMEOUT_IN_SECONDS
+      @open_timeout = options[:open_timeout] || timeout
+      @read_timeout = options[:read_timeout] || timeout
 
       @config = {
         client_id:     client_id,
@@ -96,7 +98,7 @@ module SynapsePayRest
         headers = headers.merge({'X-SP-IDEMPOTENCY-KEY' => options[:idempotency_key]})
       end
 
-      response = with_error_handling { RestClient::Request.execute(:method => :post, :url => full_url(path), :payload => payload.to_json, :headers => headers, :timeout => timeout) }
+      response = with_error_handling { RestClient::Request.execute(:method => :post, :url => full_url(path), :payload => payload.to_json, :headers => headers, :open_timeout => open_timeout, :read_timeout => read_timeout) }
       p 'RESPONSE:', JSON.parse(response) if @logging
       JSON.parse(response)
     end
@@ -110,7 +112,7 @@ module SynapsePayRest
     #
     # @return [Hash] API response
     def patch(path, payload)
-      response = with_error_handling { RestClient::Request.execute(:method => :patch, :url => full_url(path), :payload => payload.to_json, :headers => headers, :timeout => timeout) }
+      response = with_error_handling { RestClient::Request.execute(:method => :patch, :url => full_url(path), :payload => payload.to_json, :headers => headers, :open_timeout => open_timeout, :read_timeout => read_timeout) }
       p 'RESPONSE:', JSON.parse(response) if @logging
       JSON.parse(response)
     end
@@ -123,7 +125,7 @@ module SynapsePayRest
     #
     # @return [Hash] API response
     def get(path)
-      response = with_error_handling { RestClient.get(full_url(path), headers) }
+      response = with_error_handling { RestClient::Request.execute(:method => :get, :url => full_url(path), :headers => headers, :open_timeout => open_timeout, :read_timeout => read_timeout) }
       p 'RESPONSE:', JSON.parse(response) if @logging
       JSON.parse(response)
     end
@@ -136,14 +138,14 @@ module SynapsePayRest
     #
     # @return [Hash] API response
     def delete(path)
-      response = with_error_handling { RestClient.delete(full_url(path), headers) }
+      response = with_error_handling { RestClient::Request.execute(:method => :delete, :url => full_url(path), :headers => headers, :open_timeout => open_timeout, :read_timeout => read_timeout) }
       p 'RESPONSE:', JSON.parse(response) if @logging
       JSON.parse(response)
     end
 
     private
 
-    attr_reader :timeout
+    attr_reader :timeout, :open_timeout, :read_timeout
 
     def full_url(path)
       "#{base_url}#{path}"
